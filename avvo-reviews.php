@@ -107,7 +107,7 @@ class AVVO_Reviews {
 	/**
 	 * Will check if results have already been fetched for same request.
 	 * @param  string $endpoint Endpoint representing what information to return.
-	 * @return boolean| array   Returns false on API failure or an array of reviews objects on success.
+	 * @return WP_Error|array   Return array of reviews objects on success or WP_Error on faillure.
 	 */
 	private function fetch_results( $endpoint ) {
 
@@ -119,12 +119,11 @@ class AVVO_Reviews {
 			$results = $this->make_request( $endpoint );
 
 			// Only cache results if they are not an error.
-			if( is_wp_error( $results ) ) {
-				return false;
-			}
+			if( ! is_wp_error( $results ) ) {
 
-			// Cache results for 1 hour.
-			set_transient( $endpoint, $results, 1440 );
+				// Cache results for 1 hour.
+				set_transient( $endpoint, $results, 1440 );
+			}
 		}
 
 		return $results;
