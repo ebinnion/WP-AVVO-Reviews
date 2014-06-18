@@ -36,8 +36,8 @@ class AVVO_Reviews {
 	 *
 	 * @param  integer $lawyer_id The lawyer's AVVO ID.
 	 */
-	function get_reviews_markup( $lawyer_id ) {
-		$reviews = $this->get_reviews( $lawyer_id );
+	function get_reviews_markup( $lawyer_id, $most_recent = false ) {
+		$reviews = $this->get_reviews( $lawyer_id, $most_recent );
 
 		if( ! empty( $reviews ) ) : ?>
 
@@ -74,8 +74,8 @@ class AVVO_Reviews {
 	function get_reviews( $lawyer_id, $most_recent = false ) {
 		$reviews = $this->fetch_results( "/lawyers/{$lawyer_id}/reviews.json" );
 
-		if ( $most_recent ) {
-			$reviews = array( $reviews );
+		if ( true == $most_recent ) {
+			$reviews = array_reverse( $reviews );
 		}
 
 		if ( is_wp_error( $reviews ) ) {
