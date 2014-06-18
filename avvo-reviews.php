@@ -32,30 +32,6 @@ class AVVO_Reviews {
 	}
 
 	/**
-	 * Generates the rating stars markup for.
-	 *
-	 * @param  integer $rating The rating of the current review.
-	 */
-	function generate_star_rating( $rating = 0 ) {
-
-		if( 0 != intval( $rating ) ) : ?>
-
-			<div class="rating">
-				<?php
-					for( $i = 0; $i < 5; $i++ ) {
-						if ( $i < $rating ) {
-							echo '<span>&#9733;</span>';
-						} else {
-							echo '<span>&#9734;</span>';
-						}
-					}
-				?>
-			</div>
-
-		<?php endif;
-	}
-
-	/**
 	 * Returns the reviews markup for a lawyer when given a valid AVVO lawyer ID.
 	 *
 	 * @param  integer $lawyer_id The lawyer's AVVO ID.
@@ -95,9 +71,63 @@ class AVVO_Reviews {
 	 * @param  integer $lawyer_id the lawyer's AVVO ID.
 	 */
 	function get_reviews( $lawyer_id ) {
-		if( isset( $lawyer_id) ) {
-			return $this->make_request( "/lawyers/{$lawyer_id}/reviews.json" );
+		$reviews = $this->fetch_results( "/lawyers/{$lawyer_id}/reviews.json" );
+
+		if( is_wp_error( $reviews ) ) {
+			$reviews = false;
 		}
+
+		return $reviews;
+	}
+
+	/**
+	 * Generates the rating stars markup for.
+	 *
+	 * @param  integer $rating The rating of the current review.
+	 */
+	private function generate_star_rating( $rating = 0 ) {
+
+		if( 0 != intval( $rating ) ) : ?>
+
+			<div class="rating">
+				<?php
+					for( $i = 0; $i < 5; $i++ ) {
+						if ( $i < $rating ) {
+							echo '<span>&#9733;</span>';
+						} else {
+							echo '<span>&#9734;</span>';
+						}
+					}
+				?>
+			</div>
+
+		<?php endif;
+	}
+
+	/**
+	 * Will check if results have already been fetched for same request.
+	 * @param  string $endpoint Endpoint representing what information to return.
+	 * @return boolean| array   Returns false on API failure or an array of reviews objects on success.
+	 */
+	private function fetch_results( $endpoint ) {
+
+		/*
+		 * Check if a request for this endpoint has already been cached. If so, use those results.
+		 * If not, fetch fresh results.
+		 */
+		if( false == ( $results = get_transient( $endpoint ) ) ) {
+			$results = $this->make_request( $endpoint );
+
+			// Only cache results if they are not an error.
+			if( is_wp_error( $results ) ) {
+				return false;
+			}
+
+			// Cache results for 1 hour.
+			set_transient( $endpoint, $results, 1440 );
+		}
+
+		return $results;
 	}
 
 	/**
