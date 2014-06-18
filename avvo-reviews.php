@@ -42,7 +42,7 @@ class AVVO_Reviews {
 		if( ! empty( $reviews ) ) : ?>
 
 			<div class="avvo-reviews">
-				<h2>Testimonials for <?php the_title(); ?></h2>
+				<h2>Client Reviews</h2>
 
 				<?php foreach ( $reviews as $review) : ?>
 					<div class="avvo-review">
@@ -68,12 +68,17 @@ class AVVO_Reviews {
 	/**
 	 * Returns an array of review objects when given a valid AVVO lawyer ID.
 	 *
-	 * @param  integer $lawyer_id the lawyer's AVVO ID.
+	 * @param integer $lawyer_id   The lawyer's AVVO ID.
+	 * @param boolean $most_recent True if sorting by most recent review first.
 	 */
-	function get_reviews( $lawyer_id ) {
+	function get_reviews( $lawyer_id, $most_recent = false ) {
 		$reviews = $this->fetch_results( "/lawyers/{$lawyer_id}/reviews.json" );
 
-		if( is_wp_error( $reviews ) ) {
+		if ( $most_recent ) {
+			$reviews = array( $reviews );
+		}
+
+		if ( is_wp_error( $reviews ) ) {
 			$reviews = false;
 		}
 
