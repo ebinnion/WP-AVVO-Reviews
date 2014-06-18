@@ -31,6 +31,35 @@ class AVVO_Reviews {
 		$this->password = $password;
 	}
 
+	/**
+	 * Generates the rating stars markup for.
+	 *
+	 * @param  integer $rating The rating of the current review.
+	 */
+	function generate_star_rating( $rating = 0 ) {
+
+		if( 0 != intval( $rating ) ) : ?>
+
+			<div class="rating">
+				<?php
+					for( $i = 0; $i < 5; $i++ ) {
+						if ( $i < $rating ) {
+							echo '<span>&#9733;</span>';
+						} else {
+							echo '<span>&#9734;</span>';
+						}
+					}
+				?>
+			</div>
+
+		<?php endif;
+	}
+
+	/**
+	 * Returns the reviews markup for a lawyer when given a valid AVVO lawyer ID.
+	 *
+	 * @param  integer $lawyer_id The lawyer's AVVO ID.
+	 */
 	function get_reviews_markup( $lawyer_id ) {
 		$reviews = $this->get_reviews( $lawyer_id );
 
@@ -41,20 +70,7 @@ class AVVO_Reviews {
 
 				<?php foreach ( $reviews as $review) : ?>
 					<div class="avvo-review">
-						<div class="rating">
-							<?php
-								$total = 5;
-								$rating = $review->overall_rating;
-
-								for( $i = 0; $i < $total; $i++ ) {
-									if ( $i < $rating ) {
-										echo '<span>&#9733;</span>';
-									} else {
-										echo '<span>&#9734;</span>';
-									}
-								}
-							?>
-						</div>
+						<?php $this->generate_star_rating( $review->overall_rating ); ?>
 
 						<h4><?php echo $review->title; ?></h4>
 
@@ -73,12 +89,22 @@ class AVVO_Reviews {
 		<?php endif;
 	}
 
+	/**
+	 * Returns an array of review objects when given a valid AVVO lawyer ID.
+	 *
+	 * @param  integer $lawyer_id the lawyer's AVVO ID.
+	 */
 	function get_reviews( $lawyer_id ) {
 		if( isset( $lawyer_id) ) {
 			return $this->make_request( "/lawyers/{$lawyer_id}/reviews.json" );
 		}
 	}
 
+	/**
+	 * Makes the API request to AVVO's API.
+	 * @param  string $endpoint Endpoint representing what information to return.
+	 * @return WP_Error|array   Return array of reviews objects on success or WP_Error on faillure.
+	 */
 	private function make_request( $endpoint ) {
 		$request = wp_remote_get(
 			self::API_URL . $endpoint,
