@@ -137,7 +137,7 @@ class AVVO_Reviews {
 	/**
 	 * Makes the API request to AVVO's API.
 	 * @param  string $endpoint Endpoint representing what information to return.
-	 * @return WP_Error|array   Return array of reviews objects on success or WP_Error on faillure.
+	 * @return WP_Error|array   Return array of reviews objects on success or WP_Error on failure.
 	 */
 	private function make_request( $endpoint ) {
 		$request = wp_remote_get(
